@@ -101,6 +101,8 @@ int main(int argc, char *argv[]) {
          uncompressed_data_processed_snapshot/1e9, compressed_data_processed_snapshot/1e9);
   printf("compressed throughput: %f\n", compressed_data_processed_snapshot/duration.count()/1e9);
   printf("uncompressed throughput: %f\n", uncompressed_data_processed_snapshot/duration.count()/1e9);
+  compressed_data_processed = 0;
+  uncompressed_data_processed = 0;
   }
 
   libdeflate_free_gdeflate_decompressor(decompressor);
