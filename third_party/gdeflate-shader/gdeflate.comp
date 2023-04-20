@@ -61,10 +61,6 @@ struct tile_t {
 // buffers, the block array stores byte offsets and sizes.
 layout(buffer_reference, buffer_reference_align = 16)
 readonly buffer tile_list_t {
-  uint32_t tile_count;
-  uint32_t reserved0;
-  uint32_t reserved1;
-  uint32_t uncompressed_size;
   tile_t tiles[];
 };
 
@@ -85,6 +81,9 @@ layout(push_constant)
 uniform push_t {
   tile_list_t tile_list;
   output_data_t output_data;
+  uint64_t input_data_va;
+  uint32_t uncompressed_size;
+  uint32_t reserved_pc;
 };
 
 
@@ -678,14 +677,14 @@ void main() {
   uint32_t tile_idx = gl_WorkGroupID.x;
   tile_t tile_params = tile_list.tiles[tile_idx];
 
-  g_tile_va = tile_data_t(uint64_t(tile_list) + tile_params.offset);
+  g_tile_va = tile_data_t(input_data_va + tile_params.offset);
   g_tile_size = tile_params.size / 4;
 
   bit_reader_t br;
   bit_reader_init(br);
 
   uint32_t out_dst = tile_idx * BLOCK_SIZE;
-  uint32_t out_size = min(BLOCK_SIZE, tile_list.uncompressed_size - out_dst);
+  uint32_t out_size = min(BLOCK_SIZE, uncompressed_size - out_dst);
 
   for (uint32_t i = 0; i < out_size; i += NUM_THREADS) {
     uint32_t offset = i + gl_LocalInvocationIndex;
